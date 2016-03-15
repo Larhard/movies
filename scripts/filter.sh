@@ -54,12 +54,16 @@ for f in "$filmsdir"/*; do
 			continue
 		fi
 
+		# count votes
+		vote_stats=$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" \
+				| awk 'BEGIN{p=0; m=0} /^+/{p++} /^-/{m++} END{print p":"m}')
+
 		if $verbose; then
-			echo "--- ${f##*/} ---"
+			echo "--- [$vote_stats] ${f##*/} ---"
 			sed -e '/^---\+$/,$d' "$f"
 			echo
 		else
-			echo "${f##*/}"
+			echo "$vote_stats ${f##*/}"
 		fi
 	fi
 done
