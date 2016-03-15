@@ -3,6 +3,8 @@ filmsdir=$(dirname "$basedir")
 
 people=()
 verbose=false
+no_plus=false
+no_minus=false
 
 while [ $# -gt 0 ]; do
 	cmd="$1"
@@ -11,6 +13,12 @@ while [ $# -gt 0 ]; do
 	case "$cmd" in
 		--verbose|-v)
 			verbose=true
+		;;
+		--no-plus|-p)
+			no_plus=true
+		;;
+		--no-minus|-m)
+			no_minus=true
 		;;
 		--)
 			break
@@ -32,26 +40,30 @@ done
 
 for f in "$filmsdir"/*; do
 	if [ -f "$f" ]; then
-		fail=false
-		for p in "${people[@]}"; do
-			if [ "$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" | grep -- "-$p")" != "" ]; then
-				fail=true
-				break
+		if ! $no_minus; then
+			fail=false
+			for p in "${people[@]}"; do
+				if [ "$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" | grep -- "-$p")" != "" ]; then
+					fail=true
+					break
+				fi
+			done
+			if $fail; then
+				continue
 			fi
-		done
-		if $fail; then
-			continue
 		fi
 
-		result=$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' -e '/^[^+]/d' -e 's/^+//' "$f" | \
-				sort -u | \
-				while IFS=$'\n' read -r p; do
-					if [[ ! "${people[@]}" =~ "$p" ]]; then
-						echo "$p"
-					fi
-				done)
-		if [ "$result" != "" ]; then
-			continue
+		if ! $no_plus; then
+			result=$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' -e '/^[^+]/d' -e 's/^+//' "$f" | \
+					sort -u | \
+					while IFS=$'\n' read -r p; do
+						if [[ ! "${people[@]}" =~ "$p" ]]; then
+							echo "$p"
+						fi
+					done)
+			if [ "$result" != "" ]; then
+				continue
+			fi
 		fi
 
 		# count votes
