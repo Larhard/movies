@@ -43,7 +43,7 @@ for f in "$filmsdir"/*; do
 		if ! $no_minus; then
 			fail=false
 			for p in "${people[@]}"; do
-				if [ "$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" | grep -- "-$p")" != "" ]; then
+				if [ "$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" | grep -- "^-$p")" != "" ]; then
 					fail=true
 					break
 				fi
